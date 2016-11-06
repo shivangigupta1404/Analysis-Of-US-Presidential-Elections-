@@ -1,0 +1,83 @@
+{%load staticfiles%}
+<html>
+<head>
+    <title>Highcharts Tutorial</title>
+   <script src="http://ajax.googleapis.com/ajax/libs/jquery/2.1.3/jquery.min.js"></script>
+   <script src="http://code.highcharts.com/highcharts.js"></script> 
+   <script src="http://code.highcharts.com/highcharts-more.js"></script>    
+   <script src="http://code.highcharts.com/modules/data.js"></script> 
+   <link href="http://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/css/bootstrap.min.css" rel="stylesheet">
+   <style>
+    #back{font-size:40px;color: #fff;position:relative;left:50px;}
+   </style>
+</head>
+<body style="margin-top:40px;background-color:#000;">
+<div class="container">
+    <div id="container1" class="col-sm-8" style="height: 400px;margin: 0 auto; margin-top:100px;"></div>
+</div>
+<div id="csv" style="display:none">
+type,frequency
+{% for r in retweet %}
+    {{r.category}},{{r.count}}
+{% endfor %}
+</div>
+<script language="JavaScript">
+    $(document).ready(function() {
+            $(function() {
+                Highcharts.setOptions({colors: [ '#058DC7','#ED561B',]});
+                $('#container1').highcharts({
+                    title: {
+                        text: 'Distribution of Original Tweets vs Retweeted Tweets',
+                        style: {fontFamily: 'monospace',color: "#fff"}
+
+                    },            
+                    chart: {
+                        type: 'pie',
+                        backgroundColor: {
+                            linearGradient: { x1: 0, y1: 0, x2: 0, y2: 1 },
+                            stops: [
+                                [0, 'rgb(96, 96, 96)'],
+                                [1, 'rgb(16, 16, 16)']
+                            ]
+                          },
+                        borderWidth: 0,
+                        borderRadius: 0,
+                        plotBackgroundColor: null,
+                        plotShadow: false,
+                        plotBorderWidth: 0
+                    },
+                    data: {
+                        csv:document.getElementById('csv').innerHTML
+                    },
+
+                    plotOptions: {
+                        series: {
+                            dataLabels: {
+                                enabled: true,
+                                style: {fontFamily: 'monospace',color: "#fff"}
+                            }
+                        },
+                        pie:{
+                            showInLegend: true,
+                            dataLabels: {
+                                enabled: true,
+                                format: '<b>{point.name}</b>: {point.percentage:.1f} %',
+                            }
+                        }
+                    },
+                    credits:{enabled:false},
+                    legend:{
+                        itemStyle: {
+                            font: '9pt Trebuchet MS, Verdana, sans-serif',
+                            color: '#fff'
+                         },
+                        itemHoverStyle: {
+                             color: '#fff'
+                        },
+                    }
+                });
+            });
+    });
+</script>
+</body>
+</html>

@@ -1,0 +1,122 @@
+<!DOCTYPE html>
+<html> 
+<head>
+  <style>
+    html,
+    body {
+      font-family: Arial,san-serif;
+      height:100%;
+      margin: 0;
+      padding: 0;
+    }
+    #sample {
+      height: 100%;
+    }
+  </style>
+  <script src = "http://maps.googleapis.com/maps/api/js?key=AIzaSyAAxB9WOHnxWigaYDixQoxHG2dv_-TFlSg"></script>
+  <script type="text/javascript" src="https://cdn.rawgit.com/googlemaps/v3-utility-library/master/markerclustererplus/src/markerclusterer.js"></script>
+  <script>
+    var iconBase = 'http://maps.gstatic.com/mapfiles/ridefinder-images/';
+    var icons = {
+      coordinate: {
+        icon: iconBase + 'mm_20_blue.png'
+      },
+      place: {
+        icon: iconBase + 'mm_20_red.png'
+      }
+    };
+    var map;
+    //marker clusterer
+    var mc;
+
+    var mcOptions = {gridSize: 20, maxZoom:17, imagePath: "https://cdn.rawgit.com/googlemaps/v3-utility-library/master/markerclustererplus/images/m"};
+    //global infowindow
+    var infowindow = new google.maps.InfoWindow();
+    var geocoder = new google.maps.Geocoder();
+
+    var markers=new 
+    Array({% for m in marker %}
+            {% if forloop.first %}
+              "{{m.latitude}},{{m.longitude}}"
+            {% else %}
+              ,"{{m.latitude}},{{m.longitude}}"
+            {% endif %}
+          {% endfor %}
+    );
+
+    var html=new 
+    Array({% for m in marker %}
+            {% if forloop.first %}
+              '<b>{{m.user_name}}</b> said </br>"{{m.markerName}}"'
+            {% else %}
+              ,'<b>{{m.user_name}}</b> said </br>"{{m.markerName}}"'
+            {% endif %}
+          {% endfor %}
+    );
+
+    var type=new 
+    Array({% for m in marker %}
+            {% if forloop.first %}
+              "{{m.marker_type}}"
+            {% else %}
+              ,"{{m.marker_type}}"
+            {% endif %}
+          {% endfor %}
+    );
+    function createMarker(latlng,text,type) {
+      var marker = new google.maps.Marker({
+        position: latlng,
+        map: map,
+        icon: icons[type].icon,
+        Title: text
+      });
+
+      ///get array of markers currently in cluster
+      var allMarkers = mc.getMarkers();
+
+      //check to see if any of the existing markers match the latlng of the new marker
+      if (allMarkers.length != 0) {
+        for (i=0; i < allMarkers.length; i++) {
+          var existingMarker = allMarkers[i];
+          var pos = existingMarker.getPosition();
+
+          if (latlng.equals(pos)) {
+            text = text + " </br></br> " + html[i];
+          }                   
+        }
+      }
+
+      google.maps.event.addListener(marker, 'click', function() {
+        infowindow.close();
+        infowindow.setContent(text);
+        infowindow.open(map,marker);
+      });
+      mc.addMarker(marker);
+      return marker;
+    }        
+     function loadMap() {
+        var mapOptions = {
+           center:new google.maps.LatLng(40.4637,31.1342), 
+           zoom:3,
+           mapTypeId:google.maps.MapTypeId.ROADMAP
+        };
+        map = new google.maps.Map(document.getElementById("sample"),mapOptions);
+        var gmarkers = [];
+        mc = new MarkerClusterer(map, [], mcOptions);
+        for (i=0; i<markers.length; i++) {
+           var ptStr = markers[i];
+           var coords = ptStr.split(",");
+           var latlng = new google.maps.LatLng(parseFloat(coords[0]),parseFloat(coords[1]));          
+           gmarkers.push(createMarker(latlng,html[i],type[i]));
+        }
+     }
+     
+    function doNothing() {}
+  </script>     
+</head>
+   
+<body onload="loadMap()">
+  <div id = "sample"></div>
+</body>
+   
+</html>
